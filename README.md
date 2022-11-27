@@ -25,7 +25,7 @@ foreach (var item in events)
     int? price = PriceServices.GetPrice(item);
     EmailServices.AddToEmail(customer, item, price);
 }
-```c#
+```
 2.	**How would you call the AddToEmail method in order to send the events in an email?**
 ```C#
 var eventCloseToDate = events.Where(e => e.Date > DateTime.Now && e.Date.Month == customer.BirthDate.Month && e.Date.Subtract(DateTime.Now).TotalDays < 365).ToList().Min(new EventDateComparer());
@@ -38,7 +38,7 @@ var eventCloseToDate = events.Where(e => e.Date > DateTime.Now && e.Date.Month =
  {
      Console.WriteLine($"No event close to {customer.Name}");
  }
-```C#
+```
 List<Event> events = GetEventsByCity(customer.City);
 
 events.Sort(new EventPriceComparer());
