@@ -100,7 +100,7 @@ namespace EventManagementSolution
             //    Console.WriteLine($"{count}. {e.Name} is taking place at {e.City} on the {e.Date}");
             //}
 
-            var eventCloseToDate = events.Where(e => e.Date > DateTime.Now && e.Date.Month == customer.BirthDate.Month).ToList().Min(new EventDateComparer());
+            var eventCloseToDate = events.Where(e => e.Date > DateTime.Now && e.Date.Month == customer.BirthDate.Month && e.Date.Subtract(DateTime.Now).TotalDays < 365).ToList().Min(new EventDateComparer());
             
             if(eventCloseToDate !=null)
             {
@@ -223,11 +223,11 @@ namespace EventManagementSolution
 
         public static int GetDistance(string fromCity, string toCity)
         {
-            // Assuming Idempotent calls
+            // Assuming Idempotent calls, retries for 404, timeouts, etc.
             int numberOfTries = 5;
-            bool isError = true;
+            
 
-            while(numberOfTries > 0 && isError == true)
+            while(numberOfTries > 0)
             {
                 numberOfTries--;
 
@@ -261,16 +261,12 @@ namespace EventManagementSolution
 
                         return computedDistance;
                     }
-
-                    isError = false;
-                    
+                                                          
 
                 }
                 catch (Exception)
                 {
-                    // Returns a zero for the distance
-                   
-                    //isError = true;
+                    // Log exception
                 }
                 
             }
