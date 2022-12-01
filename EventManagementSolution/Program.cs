@@ -92,7 +92,7 @@ namespace EventManagementSolution
         public static void GetAllEventsCloseToCustomerBirthday(int topN = 2)
         {
             // For events within the next one year.
-            //var eventsCloseToBirthDate = events.Where(e => e.Date > DateTime.Now && e.Date.Month == customer.BirthDate.Month && e.Date.Subtract(DateTime.Now).TotalDays < 365).ToList();
+            // var eventsCloseToBirthDate = events.Where(e => e.Date > DateTime.Now && e.Date.Month == customer.BirthDate.Month && e.Date.Subtract(DateTime.Now).TotalDays < 365).ToList();
 
 
             // For events till the end of next year ( to cater for December)
