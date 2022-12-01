@@ -24,12 +24,11 @@ namespace EventManagementSolution
             Id = 1,
             Name = "John",
             City = "New York",
-            BirthDate = new DateTime(1995, 05, 10)
+            BirthDate = new DateTime(1995, 12, 10)
         };
 
         static void Main(string[] args)
-        {
-            
+        {            
 
             Console.WriteLine("Welcome to EventEngine 1.0");
 
@@ -77,7 +76,7 @@ namespace EventManagementSolution
             int distance = GetDistance(e.City, customer.City);
             Console.WriteLine($"{index}. {customer.Name} from {customer.City} event {e.Name} " +
                 $""+(distance > 0 ? $" ({distance} miles away)" : "") +
-                $" at {e.Date} for ${price}");
+                $" at {e.City} on {e.Date} for ${price}");
         }
 
         public static void GetAllEvents()
@@ -86,25 +85,38 @@ namespace EventManagementSolution
             foreach(Event e in events)
             {
                 count++;
-                SendCustomerNotifications(count, customer, e);
+                Console.WriteLine($"{count}. {e.Name} is taking place at {e.City} on the {e.Date}");
             }
         }
 
-        public static void GetAllEventsCloseToCustomerBirthday()
+        public static void GetAllEventsCloseToCustomerBirthday(int topN = 2)
         {
-            //var eventsCloseToDate = events.Where(e => e.Date > DateTime.Now && e.Date.Month == customer.BirthDate.Month).ToList();//.Min(e => e.Date);
-            //int count = 0;
-            //foreach (Event e in eventsCloseToDate)
-            //{
-            //    count++;
-            //    Console.WriteLine($"{count}. {e.Name} is taking place at {e.City} on the {e.Date}");
-            //}
+            // For events within the next one year.
+            //var eventsCloseToBirthDate = events.Where(e => e.Date > DateTime.Now && e.Date.Month == customer.BirthDate.Month && e.Date.Subtract(DateTime.Now).TotalDays < 365).ToList();
 
-            var eventCloseToDate = events.Where(e => e.Date > DateTime.Now && e.Date.Month == customer.BirthDate.Month && e.Date.Subtract(DateTime.Now).TotalDays < 365).ToList().Min(new EventDateComparer());
-            
-            if(eventCloseToDate !=null)
+
+            // For events till the end of next year ( to cater for December)
+            var eventsCloseToBirthDate = events.Where(e => e.Date > DateTime.Now && e.Date.Month == customer.BirthDate.Month
+                && e.Date.Year - DateTime.Now.Year < 2)
+                .ToList();
+
+            eventsCloseToBirthDate.Sort(new EventDateComparer());
+
+            if (eventsCloseToBirthDate.Count > 0)
             {
-                Console.WriteLine($"{eventCloseToDate.Name} is taking place at {eventCloseToDate.City} on the {eventCloseToDate.Date}");
+                int count = 0;
+                              
+                int sendLimit = topN;
+
+                foreach (Event e in eventsCloseToBirthDate)
+                {
+                    count++;
+                    sendLimit--;
+                    SendCustomerNotifications(count, customer, e);
+
+                    if (sendLimit == 0)
+                        break;
+                }
             }
             else
             {
@@ -274,7 +286,6 @@ namespace EventManagementSolution
             return 0;
 
         }
-
 
         public static int GetPrice(Event e)
         {
