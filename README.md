@@ -28,16 +28,32 @@ foreach (var item in events)
 ```
 2.	**As part of a new campaign, we need to be able to let customers know about events that are coming up close to their next birthday.**
 ```C#
-var eventCloseToDate = events.Where(e => e.Date > DateTime.Now && e.Date.Month == customer.BirthDate.Month && e.Date.Subtract(DateTime.Now).TotalDays < 365).ToList().Min(new EventDateComparer());
+var eventsCloseToBirthDate = events.Where(e => e.Date > DateTime.Now && e.Date.Month == customer.BirthDate.Month
+    && e.Date.Year - DateTime.Now.Year < 2)
+    .ToList();
 
- if(eventCloseToDate !=null)
- {
-     Console.WriteLine($"{eventCloseToDate.Name} is taking place at {eventCloseToDate.City} on the {eventCloseToDate.Date}");
- }
- else
- {
-     Console.WriteLine($"No event close to {customer.Name}");
- }
+eventsCloseToBirthDate.Sort(new EventDateComparer());
+
+if (eventsCloseToBirthDate.Count > 0)
+{
+    int count = 0;
+
+    int sendLimit = topN;
+
+    foreach (Event e in eventsCloseToBirthDate)
+    {
+        count++;
+        sendLimit--;
+        SendCustomerNotifications(count, customer, e);
+
+        if (sendLimit == 0)
+            break;
+    }
+}
+else
+{
+    Console.WriteLine($"No event close to {customer.Name}");
+}
 ```                
 
 3.	**Do you believe there is a way to improve the code you first wrote?** 
@@ -99,6 +115,7 @@ By using a `Dictionary<key,int>` to cache the distances, where the key is a conc
              return 0;
          }
 
+         // Bi-directional key
          string[] citiesArray = { fromCity, toCity };
 
          Array.Sort(citiesArray, (x, y) => x.CompareTo(y));
@@ -109,8 +126,13 @@ By using a `Dictionary<key,int>` to cache the distances, where the key is a conc
          {
              return CachedDistances[distanceCacheKey];
          }
+        else
+        {
+            int computedDistance = GetAlphabeticalDistance(fromCity, toCity);
+            CachedDistances.Add(distanceCacheKey, computedDistance);
 
-         return AlphabeticalDistance(fromCity, toCity);
+            return computedDistance;
+        }
          
      }
      catch (Exception)
